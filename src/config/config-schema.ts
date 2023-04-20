@@ -4,11 +4,7 @@ const configSchema: any = Joi.object({
   NODE_ENV: Joi.string()
     .valid('dev', 'production', 'test', 'provision')
     .default('dev'),
-  POSTGRES_DB: Joi.string().required(),
-  POSTGRES_USER: Joi.string().required(),
-  POSTGRES_PASSWORD: Joi.string().required(),
-  POSTGRES_PORT: Joi.number().required(),
-  POSTGRES_HOST: Joi.string().hostname().required(),
+  DATABASE_URL: Joi.string().required(),
 });
 
 export default configSchema;

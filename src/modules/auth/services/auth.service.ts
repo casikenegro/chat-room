@@ -1,9 +1,9 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { LoginAuthDto } from './dto/login-auth.dto';
-import { RegisterAuthDto } from './dto/register-auth.dto';
+import { LoginAuthDto } from '../dto/login-auth.dto';
+import { RegisterAuthDto } from '../dto/register-auth.dto';
 import { hash, compare } from 'bcrypt';
-import { PrismaService } from 'src/database/prisma.service';
-import { User } from '../users/entities/user.entity';
+import { PrismaService } from '../../../database/prisma.service';
+import { User } from '../../users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()

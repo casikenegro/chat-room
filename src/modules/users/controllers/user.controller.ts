@@ -8,8 +8,8 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { AuthGuard } from '../auth/auth.guard';
+import { UserService } from '../service/user.service';
+import { AuthGuard } from '../../auth/auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';

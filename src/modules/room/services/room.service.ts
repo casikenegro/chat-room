@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRoomDto } from './dto/create-room.dto';
-import { UpdateRoomDto } from './dto/update-room.dto';
+import { CreateRoomDto } from '../dto/create-room.dto';
+import { UpdateRoomDto } from '../dto/update-room.dto';
+import { PrismaService } from '../../../database/prisma.service';
+import { Room } from '../entities/room.entity';
 
 @Injectable()
 export class RoomService {
+  constructor(private prisma: PrismaService) {}
   create(createRoomDto: CreateRoomDto) {
-    return 'This action adds a new room';
+    return this.prisma.room.create({
+      data: { ...new Room(createRoomDto) },
+    });
   }
 
   findAll() {

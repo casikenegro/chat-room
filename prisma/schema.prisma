@@ -11,11 +11,53 @@ datasource db {
 }
 
 model User {
-  id        String    @id @db.Uuid
-  email     String    @unique
+  id        String      @id @db.Uuid
+  email     String      @unique
   password  String
   name      String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  deletedAt DateTime?   @map("deleted_at")
+  roomId    String?     @db.Uuid
+  rooms     UserRooms[]
+
+  @@map("users")
+}
+
+model Room {
+  id          String      @id @db.Uuid
+  title       String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+  ownerId     String
+  users       UserRooms[]
+
+  @@map("rooms")
+}
+
+model UserRooms {
+  id        String    @id @db.Uuid
+  isOwner   Boolean   @default(false)
+  userId    String    @db.Uuid
+  roomId    String    @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  User      User      @relation(fields: [userId], references: [id])
+  Room      Room      @relation(fields: [roomId], references: [id])
+  messages  Message[]
+}
+
+model Message {
+  id         String    @id @db.Uuid
+  content    String
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+  userRoomId String    @db.Uuid
+  UserRoom   UserRooms @relation(fields: [userRoomId], references: [id])
+
+  @@map("messages")
 }

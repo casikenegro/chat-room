@@ -9,9 +9,9 @@ import {
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginAuthDto } from './dto/login-auth.dto';
-import { RegisterAuthDto } from './dto/register-auth.dto';
+import { AuthService } from '../services/auth.service';
+import { LoginAuthDto } from '../dto/login-auth.dto';
+import { RegisterAuthDto } from '../dto/register-auth.dto';
 
 @Controller('auth')
 export class AuthController {

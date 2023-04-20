@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
+import { AuthGuard } from '../auth/auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 
+@ApiBearerAuth()
 @Controller('users')
 export class UserController {
   constructor(private readonly usersService: UserService) {}
@@ -19,7 +23,7 @@ export class UserController {
   // create(@Body() createUserDto: CreateUserDto) {
   //   return this.usersService.create(createUserDto);
   // }
-
+  @UseGuards(AuthGuard)
   @Get()
   findAll() {
     return this.usersService.findAll();

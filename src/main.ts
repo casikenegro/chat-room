@@ -13,6 +13,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Chat Room API')
     .setDescription('The Chat Room API description')
     .setVersion('1.0')

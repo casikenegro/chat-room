@@ -9,41 +9,97 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RoomService } from '../services/room.service';
 import { CreateRoomDto } from '../dto/create-room.dto';
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { AuthGuard } from '../../../core/guards/auth.guard';
+import { AddUsersRoomDto } from '../dto/add-user-room.dto';
+import { AddMessageDto } from '../dto/add-message.dto';
 
 @Controller('room')
+@ApiTags('room')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
   @Post()
+  @ApiOperation({ summary: 'create room' })
   create(@Req() request: any, @Body() createRoomDto: CreateRoomDto) {
-    console.log(request['user'].id);
     return this.roomService.create(createRoomDto, request['user'].id);
   }
 
   @Get()
+  @ApiOperation({ summary: 'list rooms' })
   findAll() {
     return this.roomService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'get one room' })
   findOne(@Param('id') id: string) {
     return this.roomService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
-    return this.roomService.update(id, updateRoomDto);
+  @ApiOperation({ summary: 'update one room' })
+  update(
+    @Req() request: any,
+    @Param('id') id: string,
+    @Body() updateRoomDto: UpdateRoomDto,
+  ) {
+    return this.roomService.update(id, updateRoomDto, request['user'].id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.roomService.remove(id);
+  @ApiOperation({ summary: 'soft delete one room' })
+  remove(@Req() request: any, @Param('id') id: string) {
+    return this.roomService.remove(id, request['user'].id);
+  }
+
+  @Post('members/:room_id')
+  @ApiOperation({ summary: 'add user to room' })
+  addUser(
+    @Req() request: any,
+    @Param('room_id') roomId: string,
+    @Body() addUsersDto: AddUsersRoomDto,
+  ) {
+    return this.roomService.addUser(roomId, request['user'].id, addUsersDto);
+  }
+
+  @Get('members/:room_id')
+  @ApiOperation({ summary: 'get users in the room' })
+  getRoomUsers(@Param('room_id') roomId: string) {
+    return this.roomService.getRoomUsers(roomId);
+  }
+
+  @Get('messages/:room_id')
+  @ApiOperation({ summary: 'get all messages in room' })
+  getMessages(@Param('room_id') roomId: string) {
+    return this.roomService.getMessages(roomId);
+  }
+
+  @Get('messages/:room_id/last-message')
+  @ApiOperation({ summary: 'get all messages in room' })
+  getLastMessage(@Param('room_id') roomId: string) {
+    return this.roomService.getLastMessage(roomId);
+  }
+
+  @Post('messages/:room_id')
+  @ApiOperation({ summary: 'add message in room' })
+  addMessage(
+    @Param('room_id') roomId: string,
+    @Body() addMessageDto: AddMessageDto,
+  ) {
+    return this.roomService.addMessage(roomId, addMessageDto);
+  }
+  @Get('messages/:room_id/:user_id')
+  @ApiOperation({ summary: 'get all messages by user in room' })
+  getMessagesByUser(
+    @Param('room_id') roomId: string,
+    @Param('user_id') userId: string,
+  ) {
+    return this.roomService.getMessagesByUser(roomId, userId);
   }
 }

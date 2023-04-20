@@ -11,7 +11,6 @@ describe('RoomService', () => {
       providers: [RoomService, JwtService],
       imports: [DatabaseModule],
     }).compile();
-
     service = module.get<RoomService>(RoomService);
   });
 
@@ -42,10 +41,6 @@ describe('RoomService', () => {
     expect(rooms).toEqual(expect.any(Array));
   });
 
-  it('should return room', async () => {
-    const room = await service.findOne(uuidv4());
-    expect(room).toEqual(expect.any(Object));
-  });
   it('should return room', async () => {
     const room = await service.findOne(uuidv4());
     expect(room).toEqual(expect.any(Object));

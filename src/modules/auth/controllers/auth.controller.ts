@@ -1,19 +1,11 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpStatus,
-  HttpCode,
-} from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus, HttpCode } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { LoginAuthDto } from '../dto/login-auth.dto';
 import { RegisterAuthDto } from '../dto/register-auth.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

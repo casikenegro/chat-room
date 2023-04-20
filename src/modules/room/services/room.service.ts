@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateRoomDto } from '../dto/create-room.dto';
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { PrismaService } from '../../../database/prisma.service';
 import { Room } from '../entities/room.entity';
 import { v4 as uuidv4 } from 'uuid';
 import * as moment from 'moment';
+import { AddUsersRoomDto } from '../dto/add-user-room.dto';
+import { AddMessageDto } from '../dto/add-message.dto';
 
 @Injectable()
 export class RoomService {
@@ -74,26 +80,36 @@ export class RoomService {
   async remove(id: string, owner: string): Promise<Room> {
     return this.update(id, { deletedAt: moment.utc().format() }, owner); // soft delete the room
   }
-  async addUsers(id: string, owner, userIds: string[]): Promise<Room> {
+  async addUser(id: string, owner, addUsersDto: AddUsersRoomDto): Promise<any> {
     await this.isOwner(id, owner);
     const date = moment.utc().format();
-    await this.prisma.room.update({
-      where: { id },
+    const existInRoom = await this.prisma.userRooms.findFirst({
+      where: { roomId: id, userId: addUsersDto.userId },
+    });
+    if (existInRoom) throw new BadRequestException();
+
+    return this.prisma.userRooms.create({
       data: {
-        users: {
-          create: userIds.map((userId) => ({
-            id: uuidv4(),
-            createdAt: date,
-            updatedAt: date,
-            userId,
-            roomId: id,
-          })),
-        },
+        id: uuidv4(),
+        userId: addUsersDto.userId,
+        roomId: id,
+        createdAt: date,
+        updatedAt: date,
       },
     });
-    return this.findOne(id);
   }
-  async addMessage(userRoomId: string, content: string): Promise<boolean> {
+  async getRoomUsers(roomId: string): Promise<any> {
+    return this.prisma.userRooms.findMany({
+      where: { roomId },
+      include: {
+        User: true,
+      },
+    });
+  }
+  async addMessage(
+    userRoomId: string,
+    addMessageDto: AddMessageDto,
+  ): Promise<boolean> {
     try {
       const date = moment.utc().format();
       await this.prisma.message.create({
@@ -101,7 +117,7 @@ export class RoomService {
           id: uuidv4(),
           createdAt: date,
           updatedAt: date,
-          content,
+          content: addMessageDto.message,
           userRoomId,
         },
       });
@@ -135,7 +151,7 @@ export class RoomService {
           include: {
             messages: {
               orderBy: {
-                updatedAt: 'desc',
+                updatedAt: 'asc',
               },
               take: 1,
             },
@@ -156,15 +172,19 @@ export class RoomService {
     });
   }
   private async isOwner(roomId: string, userId: string): Promise<boolean> {
-    const room = await this.prisma.room.findUnique({
-      where: { id: roomId },
-      include: {
-        users: {
-          where: { userId, isOwner: true },
+    try {
+      const room = await this.prisma.room.findUnique({
+        where: { id: roomId },
+        include: {
+          users: {
+            where: { userId, isOwner: true },
+          },
         },
-      },
-    });
-    if (!room) throw new NotFoundException('Room not found');
-    return room.users[0].isOwner;
+      });
+      if (!room) throw new NotFoundException('Room not found');
+      return room.users[0].isOwner;
+    } catch (error) {
+      throw new NotFoundException('Room not found');
+    }
   }
 }

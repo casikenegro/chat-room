@@ -31,7 +31,6 @@ model Room {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   deletedAt   DateTime?
-  ownerId     String
   users       UserRooms[]
 
   @@map("rooms")
@@ -39,15 +38,17 @@ model Room {
 
 model UserRooms {
   id        String    @id @db.Uuid
-  isOwner   Boolean   @default(false)
-  userId    String    @db.Uuid
-  roomId    String    @db.Uuid
+  isOwner   Boolean   @default(false) @map("is_owner")
+  userId    String    @map("user_id") @db.Uuid
+  roomId    String    @map("room_id") @db.Uuid
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
-  User      User      @relation(fields: [userId], references: [id])
-  Room      Room      @relation(fields: [roomId], references: [id])
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
   messages  Message[]
+
+  @@map("user_rooms") 
 }
 
 model Message {

@@ -7,9 +7,10 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { AuthGuard } from '../../auth/auth.guard';
+import { AuthGuard } from '../../../core/guards/auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
@@ -25,7 +26,7 @@ export class UserController {
   // }
   @UseGuards(AuthGuard)
   @Get()
-  findAll() {
+  findAll(): Promise<any> {
     return this.usersService.findAll();
   }
 

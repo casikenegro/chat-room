@@ -6,8 +6,9 @@ export class CreateRoomDto {
   @MinLength(4)
   @MaxLength(14)
   @ApiProperty({ required: true })
-  name: string;
+  title: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty()
+  @IsNotEmpty()
   description: string;
 }

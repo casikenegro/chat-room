@@ -8,6 +8,7 @@ export class User {
   password: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string;
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
     const date = moment().utc().format(); // get the current date

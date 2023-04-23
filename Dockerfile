@@ -1,42 +1,22 @@
-# Vamos a tomar la imagen de node versión 16 como base
-FROM node:16 as install
-LABEL stage=install
+FROM node:16-alpine3.16 as builder
 
-# Debemos de establecer el directorio de trabajo
-WORKDIR /src/install
-
-# Vamos a copiar los archivos de npm para instalar las dependencias
-COPY package*.json .
-
-# Instalamos las dependencias...
-RUN npm install
-
-# En un siguiente paso vamos a compilar la aplicación.
-# Usamos la misma imagen como base.
-FROM node:16 as compile
-LABEL stage=compile
-
-# Establecemos el directorio de trabajo.
-WORKDIR /src/build
-
-# Copiamos los archivos del paso anterior.
-COPY --from=install /src/install .
-# y copiamos los archivos restantes del proyecto.
-COPY . .
-
-# Compilamos e instalamos dependencias en modo producción.
-RUN npm run build
-RUN npm run install --production=true
-
-# Por último, usaremos la versión alpine
-FROM node:16-alpine as deploy
-
-# Establecemos el directorio donde vivirá nuestra app
+RUN mkdir /app && chown node:node /app
 WORKDIR /app
+RUN chmod 777 /app
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node prisma ./prisma/
+RUN npm ci
+COPY --chown=node:node . .
+RUN npm run build
+FROM node:16-alpine3.16
+WORKDIR /app
+ENV NODE_ENV production
 
-# Copiamos los node_modules y nuestro archivo main.js
-COPY --from=compile /src/build/dist/main.js index.js
-COPY --from=compile /src/build/node_modules node_modules
+COPY --chown=node:node --from=builder /app/node_modules ./node_modules
+COPY --chown=node:node --from=builder /app/package*.json ./
+COPY --chown=node:node --from=builder /app/dist ./dist
+COPY --chown=node:node --from=builder /app/prisma ./prisma
+EXPOSE 3000:3000
+USER node
 
-# Y listo, ejecutamos la aplicación.
-ENTRYPOINT node .
+CMD ["node",  "dist/src/main"]

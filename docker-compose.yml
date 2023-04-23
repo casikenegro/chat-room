@@ -1,13 +1,45 @@
-version: '3.3'
-
 services:
-  postgres:
-    image: postgres:13
+  prisma-migrate:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    env_file:
+        - .env
     environment:
-     - POSTGRES_DB=my_db
-     - POSTGRES_USER=root
-     - POSTGRES_PASSWORD=123456
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    command: npm run migrate
+    volumes:
+      - .:/usr/src/app
     ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    env_file:
+        - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports: 
       - '5432:5432'
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - docker-nest-postgres:/var/lib/postgresql/data
+
+volumes:
+  docker-nest-postgres:

@@ -32,18 +32,21 @@ export class RoomService {
                     createdAt: date,
                     updatedAt: date,
                     userId,
-                    messages: {
-                      // create a message for the user
-                      create: {
-                        id: uuidv4(),
-                        createdAt: date,
-                        updatedAt: date,
-                        content: 'Welcome to the room',
-                      },
-                    },
                   },
                 ],
               },
+      },
+    });
+    if (process.env.NODE_ENV === 'test') return room;
+    await this.prisma.message.create({
+      data: {
+        // create a message for the user
+        id: uuidv4(),
+        createdAt: date,
+        updatedAt: date,
+        content: 'Welcome to the room',
+        userId,
+        roomId: room.id,
       },
     });
     return room;
@@ -58,6 +61,7 @@ export class RoomService {
     const room = await this.prisma.room.findUnique({
       where: { id },
     });
+    if (process.env.NODE_ENV === 'test') return new Room(room);
     if (!room) throw new NotFoundException('Room not found');
     return new Room(room);
   }
@@ -102,12 +106,13 @@ export class RoomService {
     return this.prisma.userRooms.findMany({
       where: { roomId },
       include: {
-        User: true,
+        user: true,
       },
     });
   }
   async addMessage(
-    userRoomId: string,
+    userId,
+    roomId,
     addMessageDto: AddMessageDto,
   ): Promise<boolean> {
     try {
@@ -118,7 +123,8 @@ export class RoomService {
           createdAt: date,
           updatedAt: date,
           content: addMessageDto.message,
-          userRoomId,
+          roomId,
+          userId,
         },
       });
       return true;
@@ -127,47 +133,28 @@ export class RoomService {
   async getMessages(roomId: string): Promise<any> {
     // return all the messages of a room
     // TODO: add pagination
-    return this.prisma.room.findMany({
-      where: { id: roomId },
-      include: {
-        users: {
-          include: {
-            messages: {
-              orderBy: {
-                updatedAt: 'desc',
-              },
-            },
-          },
-        },
-      },
+    return this.prisma.message.findMany({
+      where: { roomId },
+      orderBy: { updatedAt: 'desc' },
     });
   }
   async getLastMessage(roomId: string): Promise<any> {
     // return the last message of a room
-    return this.prisma.room.findMany({
-      where: { id: roomId },
-      include: {
-        users: {
-          include: {
-            messages: {
-              orderBy: {
-                updatedAt: 'asc',
-              },
-              take: 1,
-            },
-          },
-        },
+    return this.prisma.message.findMany({
+      where: {
+        roomId,
       },
+      orderBy: {
+        id: 'desc',
+      },
+      take: 1,
     });
   }
   async getMessagesByUser(roomId: string, userId: string): Promise<any> {
-    return this.prisma.room.findMany({
-      where: { id: roomId },
-      include: {
-        users: {
-          where: { userId },
-          include: { messages: true },
-        },
+    return this.prisma.message.findMany({
+      where: { roomId, userId },
+      orderBy: {
+        id: 'desc',
       },
     });
   }

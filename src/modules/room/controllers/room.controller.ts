@@ -89,17 +89,15 @@ export class RoomController {
   @Post('messages/:room_id')
   @ApiOperation({ summary: 'add message in room' })
   addMessage(
+    @Req() request: any,
     @Param('room_id') roomId: string,
     @Body() addMessageDto: AddMessageDto,
   ) {
-    return this.roomService.addMessage(roomId, addMessageDto);
+    return this.roomService.addMessage(request.user.id, roomId, addMessageDto);
   }
-  @Get('messages/:room_id/:user_id')
+  @Get('messages/:room_id/user')
   @ApiOperation({ summary: 'get all messages by user in room' })
-  getMessagesByUser(
-    @Param('room_id') roomId: string,
-    @Param('user_id') userId: string,
-  ) {
-    return this.roomService.getMessagesByUser(roomId, userId);
+  getMessagesByUser(@Param('room_id') roomId: string, @Req() request: any) {
+    return this.roomService.getMessagesByUser(roomId, request.user.id);
   }
 }

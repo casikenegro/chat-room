@@ -5,6 +5,7 @@ const configSchema: any = Joi.object({
     .valid('dev', 'production', 'test', 'provision')
     .default('dev'),
   DATABASE_URL: Joi.string().required(),
+  JWT_SECRET: Joi.string().default('secret'),
 });
 
 export default configSchema;

@@ -14,7 +14,7 @@ We got your back, the project already uses docker so you can build docker image
 2.  Run  `npm install`  to install dependencies
 3.  Copy the  `.env.example`  file over to your own  `.env`  file and update the variables
 4.  Run  `docker-compose up -d`  to setup local environment with Docker
-5. 
+
 
 This setup will handle hot reloading, so any updates you make to the NestJS code will update the container in realtime.
 <!--[![Backers on Open Collective]😎(https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
@@ -31,7 +31,7 @@ This setup will handle hot reloading, so any updates you make to the NestJS code
 
   
 
-## Installation
+## Installation locally
 
   
 
@@ -41,7 +41,11 @@ $ npm  install
 
 ```
 
-  
+```bash
+
+$ cp .env.example .env #copy the .env.example file over to your own .env file and update the variables
+
+```
 
 ## Running the app
 
